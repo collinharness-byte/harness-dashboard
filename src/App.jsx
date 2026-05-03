@@ -9,82 +9,135 @@ export default function App() {
   const [workouts, setWorkouts] = useState(0);
   const [jogs, setJogs] = useState(0);
 
+  const today = "Sunday, May 3, 2026";
   const weeklyGoal = 1000;
+
   const incomeProgress = Math.min((weeklyIncome / weeklyGoal) * 100, 100);
 
   const estimatedWeeks = useMemo(() => {
     const gap = weeklyGoal - weeklyIncome;
     if (gap <= 0) return 0;
+
     const estimatedWeeklyIncomeAdded = weeklyInvestment * 0.012;
+    if (estimatedWeeklyIncomeAdded <= 0) return "—";
+
     return Math.ceil(gap / estimatedWeeklyIncomeAdded);
   }, [weeklyIncome, weeklyInvestment]);
-
-  const cards = [
-    ["Weekly Income", `$${weeklyIncome}`, `${incomeProgress.toFixed(1)}% to goal`],
-    ["Portfolio Value", `$${portfolioValue.toLocaleString()}`, "Current base"],
-    ["Weekly Investment", `$${weeklyInvestment}`, "Capital added"],
-    ["Est. Weeks to Goal", estimatedWeeks, "Rough estimate"],
-  ];
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
         <p style={styles.badge}>Personal Operating System</p>
+
         <h1 style={styles.title}>Harness Dashboard</h1>
+
+        <p style={styles.date}>{today}</p>
+
         <p style={styles.subtitle}>
           Track your money, content, health, and momentum in one place.
         </p>
-        const today = new Date().toLocaleDateString("en-US", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-});<h1 style={styles.title}>Harness Dashboard</h1><p style={{ color: "#94a3b8", marginBottom: 20 }}>
-  {today}
-</p>
 
         <div style={styles.grid4}>
-          {cards.map(([label, value, note]) => (
-            <div style={styles.card} key={label}>
-              <p style={styles.cardLabel}>{label}</p>
-              <h2 style={styles.cardValue}>{value}</h2>
-              <p style={styles.note}>{note}</p>
-            </div>
-          ))}
+          <MetricCard
+            label="Weekly Income"
+            value={`$${weeklyIncome}`}
+            note={`${incomeProgress.toFixed(1)}% to goal`}
+          />
+          <MetricCard
+            label="Portfolio Value"
+            value={`$${portfolioValue.toLocaleString()}`}
+            note="Current base"
+          />
+          <MetricCard
+            label="Weekly Investment"
+            value={`$${weeklyInvestment}`}
+            note="Capital added"
+          />
+          <MetricCard
+            label="Est. Weeks to Goal"
+            value={estimatedWeeks}
+            note="Rough estimate"
+          />
         </div>
 
         <section style={styles.section}>
           <h2>Income Goal</h2>
+
           <div style={styles.progressOuter}>
-            <div style={{ ...styles.progressInner, width: `${incomeProgress}%` }} />
+            <div
+              style={{
+                ...styles.progressInner,
+                width: `${incomeProgress}%`,
+              }}
+            />
           </div>
+
           <p style={styles.note}>
             ${weeklyIncome} / ${weeklyGoal} per week
           </p>
 
           <div style={styles.inputs}>
-            <Input label="Weekly Income" value={weeklyIncome} setValue={setWeeklyIncome} />
-            <Input label="Portfolio Value" value={portfolioValue} setValue={setPortfolioValue} />
-            <Input label="Weekly Investment" value={weeklyInvestment} setValue={setWeeklyInvestment} />
+            <Input
+              label="Weekly Income"
+              value={weeklyIncome}
+              setValue={setWeeklyIncome}
+            />
+            <Input
+              label="Portfolio Value"
+              value={portfolioValue}
+              setValue={setPortfolioValue}
+            />
+            <Input
+              label="Weekly Investment"
+              value={weeklyInvestment}
+              setValue={setWeeklyInvestment}
+            />
           </div>
         </section>
 
         <div style={styles.grid2}>
           <section style={styles.section}>
             <h2>Content System</h2>
-            <Tracker label="YouTube Shorts This Week" value={youtubeShorts} setValue={setYoutubeShorts} goal={7} />
-            <Tracker label="Substack Posts This Week" value={substackPosts} setValue={setSubstackPosts} goal={3} />
+
+            <Tracker
+              label="YouTube Shorts This Week"
+              value={youtubeShorts}
+              setValue={setYoutubeShorts}
+              goal={7}
+            />
+
+            <Tracker
+              label="Substack Posts This Week"
+              value={substackPosts}
+              setValue={setSubstackPosts}
+              goal={3}
+            />
+
             <ul>
               <li>Monday: Income Report</li>
               <li>Wednesday: Stock Deep Dive</li>
               <li>Friday: System Post</li>
+              <li>Daily: YouTube Shorts</li>
             </ul>
           </section>
 
           <section style={styles.section}>
             <h2>Health System</h2>
-            <Tracker label="Workouts This Week" value={workouts} setValue={setWorkouts} goal={3} />
-            <Tracker label="Jogs This Week" value={jogs} setValue={setJogs} goal={3} />
+
+            <Tracker
+              label="Workouts This Week"
+              value={workouts}
+              setValue={setWorkouts}
+              goal={3}
+            />
+
+            <Tracker
+              label="Jogs This Week"
+              value={jogs}
+              setValue={setJogs}
+              goal={3}
+            />
+
             <ul>
               <li>Improve energy</li>
               <li>Lose 10 lbs</li>
@@ -106,6 +159,7 @@ export default function App() {
 
           <section style={styles.section}>
             <h2>Life Audit Focus</h2>
+
             <div style={styles.lifeGrid}>
               <Score area="Health" score={5} />
               <Score area="Mind" score={4} />
@@ -120,6 +174,7 @@ export default function App() {
 
         <section style={styles.section}>
           <h2>Today’s Focus</h2>
+
           <div style={styles.focusGrid}>
             <Focus item="Buy or research income-producing shares" />
             <Focus item="Post one short-form video" />
@@ -128,6 +183,16 @@ export default function App() {
           </div>
         </section>
       </div>
+    </div>
+  );
+}
+
+function MetricCard({ label, value, note }) {
+  return (
+    <div style={styles.card}>
+      <p style={styles.cardLabel}>{label}</p>
+      <h2 style={styles.cardValue}>{value}</h2>
+      <p style={styles.note}>{note}</p>
     </div>
   );
 }
@@ -157,13 +222,24 @@ function Tracker({ label, value, setValue, goal }) {
           {value}/{goal}
         </span>
       </div>
+
       <div style={styles.progressOuterSmall}>
-        <div style={{ ...styles.progressInner, width: `${progress}%` }} />
+        <div
+          style={{
+            ...styles.progressInner,
+            width: `${progress}%`,
+          }}
+        />
       </div>
+
       <div style={{ marginTop: 8 }}>
-        <button style={styles.smallButton} onClick={() => setValue(Math.max(0, value - 1))}>
+        <button
+          style={styles.smallButton}
+          onClick={() => setValue(Math.max(0, value - 1))}
+        >
           -
         </button>
+
         <button style={styles.smallButton} onClick={() => setValue(value + 1)}>
           +
         </button>
@@ -208,6 +284,11 @@ const styles = {
   title: {
     fontSize: 48,
     margin: "16px 0 8px",
+  },
+  date: {
+    color: "#94a3b8",
+    fontSize: 16,
+    marginBottom: 12,
   },
   subtitle: {
     color: "#cbd5e1",
