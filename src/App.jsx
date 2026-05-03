@@ -34,6 +34,14 @@ export default function App() {
         <p style={styles.subtitle}>
           Track your money, content, health, and momentum in one place.
         </p>
+        const today = new Date().toLocaleDateString("en-US", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});<h1 style={styles.title}>Harness Dashboard</h1><p style={{ color: "#94a3b8", marginBottom: 20 }}>
+  {today}
+</p>
 
         <div style={styles.grid4}>
           {cards.map(([label, value, note]) => (
