@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { initialData, transitionApplication, reserveShift } from './data'
 import './App.css'
+import AccountActions from './AccountActions'
 const nav=['Overview','Tour stops','Calendar','Crew directory','Jobs & staffing','Announcements','Documents']
 const uid=()=>crypto.randomUUID()
 function Field({label,name,defaultValue='',type='text',required=false}) {return <label>{label}<input name={name} type={type} defaultValue={defaultValue} required={required}/></label>}
@@ -8,6 +9,7 @@ function Badge({children}) {return <span className="badge">{children}</span>}
 export default function App(){
  const [data,setData]=useState(()=>{try{const saved=JSON.parse(localStorage.getItem('tourline-v1'));return saved?.tours?.length?saved:initialData}catch{return initialData}})
  const [storageError,setStorageError]=useState(false)
+ const [signedOut,setSignedOut]=useState(()=>sessionStorage.getItem('tourline-signed-out')==='true')
  const [page,setPage]=useState('Overview'),[role,setRole]=useState('Manager'),[tourId,setTourId]=useState(data.tours[0].id),[stopId,setStopId]=useState(data.stops[0]?.id),[modal,setModal]=useState(null),[query,setQuery]=useState(''),[notice,setNotice]=useState('')
  const tour=data.tours.find(t=>t.id===tourId)||data.tours[0], stops=data.stops.filter(s=>s.tourId===tour.id),stop=stops.find(s=>s.id===stopId)||stops[0],jobs=data.jobs.filter(j=>j.tourId===tour.id)
  const update=(key,value)=>{const next={...data,[key]:typeof value==='function'?value(data[key]):value};setData(next);try{localStorage.setItem('tourline-v1',JSON.stringify(next));setStorageError(false)}catch{setStorageError(true)}}
@@ -21,7 +23,7 @@ export default function App(){
  if(modal==='job')add('jobs',{...f,tourId:tour.id,capacity:Number(f.capacity)})
  if(modal==='event')add('schedule',{...f,stopId:stop.id})
  if(modal==='task')add('tasks',{...f,stopId:stop.id,done:false})
- if(modal==='announcement')add('announcements',{...f,tourId:tour.id})
+ if(modal==='announcement')add('announcements',{...f,tourId:tour.id,createdAt:new Date().toISOString()})
  if(modal==='document')add('documents',{...f,tourId:tour.id})
  if(modal==='profile')update('profile',{...data.profile,...f,approved:false})
  if(modal?.job){const job=modal.job;if(data.applications.some(a=>a.jobId===job.id&&a.email===f.email&&a.status!=='Declined'))throw new Error('You have already applied for this job');add('applications',{...f,jobId:job.id,status:'Applied'})}
@@ -31,8 +33,11 @@ export default function App(){
  const openJobs=jobs.filter(j=>data.applications.filter(a=>a.jobId===j.id&&['Approved','Confirmed'].includes(a.status)).length<j.capacity)
  const title=role==='Worker'?'Find your next show':page==='Overview'?'Every detail. One great tour.':page
  const venueName=id=>data.stops.find(s=>s.id===id)?.city||id
- return <div className="app"><aside><a className="brand" href="#" onClick={e=>{e.preventDefault();setPage('Overview')}}><span className="brand-mark">≋</span> tourline<span className="brand-dot">.</span></a><p className="nav-label">YOUR WORKSPACE</p><nav>{nav.map((n,i)=><button className={page===n?'active':''} key={n} onClick={()=>{setPage(n);setQuery('')}}><span>{['◫','◎','▦','♙','▤','◷','▧'][i]}</span>{n}{n==='Jobs & staffing'&&<small>{openJobs.length}</small>}</button>)}</nav><div className="sidebar-bottom"><div className="help-card"><span>Made for the road.</span><p>Less coordination.<br/>More unforgettable shows.</p></div><div className="user"><span className="avatar">JE</span><div><b>{role==='Manager'?'Jordan Ellis':data.profile.name||'Worker workspace'}</b><small>{role==='Manager'?'Tour manager':'Worker'}</small></div></div></div></aside>
- <main><header><div className="breadcrumb">Workspace <span>/</span> {role==='Manager'?page:'Worker portal'}</div><div className="header-actions"><span className="demo">LOCAL PROTOTYPE</span><select aria-label="Switch workspace role" value={role} onChange={e=>{setRole(e.target.value);setNotice('')}}><option>Manager</option><option>Worker</option></select></div></header>
+ const account=data.accounts?.[role] || (role==='Manager'?{name:'Jordan Ellis',email:'jordan@example.com'}:{name:data.profile.name,email:data.profile.email})
+ const latestAnnouncements=data.announcements.filter(n=>n.tourId===tour.id&&(role==='Manager'||(n.audience==='All crew'&&assigned.some(a=>a.email===data.profile.email))))
+ if(signedOut)return <div className="signed-out"><section className="panel"><div className="eyebrow">TOURLINE</div><h1>You’re logged out</h1><p>This local prototype has no connected sign-in service. Your workspace data remains saved in this browser.</p><button className="primary" onClick={()=>{sessionStorage.removeItem('tourline-signed-out');setSignedOut(false)}}>Return to demo workspace</button></section></div>
+ return <div className="app"><aside><a className="brand" href="#" onClick={e=>{e.preventDefault();setPage('Overview')}}><span className="brand-mark">≋</span> tourline<span className="brand-dot">.</span></a><p className="nav-label">YOUR WORKSPACE</p><nav>{nav.map((n,i)=><button className={page===n?'active':''} key={n} onClick={()=>{setPage(n);setQuery('')}}><span>{['◫','◎','▦','♙','▤','◷','▧'][i]}</span>{n}{n==='Jobs & staffing'&&<small>{openJobs.length}</small>}</button>)}</nav><div className="sidebar-bottom"><div className="help-card"><span>Made for the road.</span><p>Less coordination.<br/>More unforgettable shows.</p></div><div className="user"><span className="avatar">{(account.name||'User').split(' ').map(n=>n[0]).slice(0,2).join('')}</span><div><b>{account.name||'Worker workspace'}</b><small>{role==='Manager'?'Tour manager':'Worker'}</small></div></div></div></aside>
+ <main><header><div className="breadcrumb">Workspace <span>/</span> {role==='Manager'?page:'Worker portal'}</div><div className="header-actions"><span className="demo">LOCAL PROTOTYPE</span><select aria-label="Switch workspace role" value={role} onChange={e=>{setRole(e.target.value);setNotice('')}}><option>Manager</option><option>Worker</option></select><AccountActions key={role} role={role} account={account} announcements={latestAnnouncements} onSave={values=>{update('accounts',{...data.accounts,[role]:values});setNotice('Account information saved')}} onLogout={()=>{sessionStorage.setItem('tourline-signed-out','true');setSignedOut(true);setModal(null);setNotice('')}}/></div></header>
  <div className="content">{storageError&&<div className="alert">Browser storage is unavailable. Changes will only last for this session.</div>}{notice&&<div role="status" className="notice">{notice}<button onClick={()=>setNotice('')} aria-label="Dismiss notification">×</button></div>}
  <div className="heading"><div><div className="eyebrow">THE SHOW STARTS HERE</div><h1>{title}</h1><p>{role==='Manager'?'Your people, places, and plans. Perfectly in sync.':'Discover opportunities, confirm your shifts, and get on the road.'}</p></div>{role==='Manager'?<button className="primary" onClick={()=>setModal('tour')}>＋ Create tour</button>:<button className="primary" onClick={()=>setModal('profile')}>Edit worker profile</button>}</div>
  <div className="tour-bar"><div><span className="tour-icon">♫</span><select aria-label="Selected tour" value={tour.id} onChange={e=>setTourId(e.target.value)}>{data.tours.map(t=><option value={t.id} key={t.id}>{t.name}</option>)}</select><span className="muted">{tour.artist}</span></div><Badge>{tour.start} → {tour.end}</Badge></div>
