@@ -23,7 +23,7 @@ Open the address printed by Vite. The login page offers separate manager and emp
 
 ## Try the staffing workflow
 
-1. Sign up as an employee, open Employment profile, and save qualifications, employment history, location, preferred roles, and availability.
+1. Sign up as an employee. You are taken directly to profile completion. Name, home location, qualifications / employment history, and availability are required before job and schedule pages unlock. Optional fields include phone, preferred roles, experience, and certifications. Incomplete profiles remain on this step after reload or login; completed profiles open Find jobs.
 2. Browse Find jobs and apply for a position. All posted tours are searchable.
 3. Log out through the upper-right profile menu, then sign up as a manager in the same browser.
 4. Open Jobs & staffing and approve the employee application. Employee profiles can also be preapproved for open shifts.
