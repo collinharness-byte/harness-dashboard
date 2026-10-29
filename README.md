@@ -55,3 +55,9 @@ The employee sidebar includes Find Work, Schedule, Account, Payments, Earnings, 
 Payments and Earnings are explicit empty states; no payroll records or bank details are collected. Referral codes are local identifiers with no reward or invitation tracking. Useful Information includes Arbitration Agreement, Conditional job offer, Employee Handbook, Employment Terms, Privacy Policy, State Labor Documents, Terms of use, and Third party license notices. These are placeholders awaiting employer-supplied documents, not legal agreements or acceptance flows.
 
 Managers can open Merch for the selected tour, add products with SKU / size, initial stock, and USD price, then record sale quantities. A sale atomically saves updated stock and a sales-log entry in the local workspace. Stock cannot be oversold through the form. Payments, taxes, refunds, stock adjustments, and reconciliation are not connected.
+
+## Manager Analytics
+
+Analytics in the manager sidebar uses all saved records for the selected tour. It shows confirmed staffing percentage, remaining vacancies (excluding approved reservations), task completion, application statuses, per-stop coverage, recorded merch sales, units sold, current inventory, and product sales totals. Tour-wide staffing appears at each applicable stop, while tour-level positions count each posting once. Empty staffing/task percentages display a dash. Recorded sales are not reconciled revenue or profit; ticketing, expenses, and payroll are not connected.
+
+Analytics calculation tests are in `tests/analytics.test.mjs`. Run all tests with `node --test --test-isolation=none --test-reporter=spec tests/*.test.mjs`.
