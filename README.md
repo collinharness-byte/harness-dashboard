@@ -47,3 +47,11 @@ Four tests cover local account validation and approval / confirmation transition
 This is a local demonstration, not a production staffing platform. Local login and access labels do not enforce server-side security. Managers share the sample tour workspace. Data is held in one browser, is editable through browser tools, and is not synchronized across users or devices. Use fictional information during evaluation.
 
 Next production work: user authentication, server-side permissions, shared database with transactional staffing capacity, structured qualification and availability checks, verified worker identity, password recovery, file storage, notifications, and deployment. Availability is currently a free-text statement; open shifts match qualification phrases rather than verified certifications. Documents are references / notes, not uploaded files. Crew directory is shared across the local workspace rather than assigned per tour. VIP guests and sponsors are currently stop notes rather than individual records.
+
+## Employee navigation and merchandise
+
+The employee sidebar includes Find Work, Schedule, Account, Payments, Earnings, Refer A Friend, Help, Useful Information, and Logout. Account links to Profile. Profile completion remains required before job and schedule access. Applications are available through the employee tabs.
+
+Payments and Earnings are explicit empty states; no payroll records or bank details are collected. Referral codes are local identifiers with no reward or invitation tracking. Useful Information includes Arbitration Agreement, Conditional job offer, Employee Handbook, Employment Terms, Privacy Policy, State Labor Documents, Terms of use, and Third party license notices. These are placeholders awaiting employer-supplied documents, not legal agreements or acceptance flows.
+
+Managers can open Merch for the selected tour, add products with SKU / size, initial stock, and USD price, then record sale quantities. A sale atomically saves updated stock and a sales-log entry in the local workspace. Stock cannot be oversold through the form. Payments, taxes, refunds, stock adjustments, and reconciliation are not connected.
