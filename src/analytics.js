@@ -1,4 +1,4 @@
-export function tourAnalytics(data, tourId) {
+export function tourAnalytics(data, tourId, now = new Date()) {
   const stops = data.stops.filter(s => s.tourId === tourId)
   const jobs = data.jobs.filter(j => j.tourId === tourId)
   const jobIds = new Set(jobs.map(j => j.id))
@@ -8,6 +8,16 @@ export function tourAnalytics(data, tourId) {
   const confirmed = applications.filter(a => a.status === 'Confirmed').length
   const approved = applications.filter(a => a.status === 'Approved').length
   const positions = jobs.reduce((sum, j) => sum + Number(j.capacity), 0)
+  const today = new Intl.DateTimeFormat('en-CA', {timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).format(now)
+  const windowEnd = new Date(`${today}T12:00:00Z`)
+  windowEnd.setUTCDate(windowEnd.getUTCDate() + 6)
+  const lastDay = windowEnd.toISOString().slice(0,10)
+  const confirmedApplications = applications.filter(a => a.status === 'Confirmed')
+  const totalWorkers = new Set(confirmedApplications.map(a => a.workerId || a.email?.trim().toLowerCase()).filter(Boolean)).size
+  const upcomingShifts = confirmedApplications.reduce((sum, a) => {
+    const job = jobs.find(j => j.id === a.jobId)
+    return sum + stops.filter(s => (job.scope === 'Tour-wide' || s.id === job.scope) && s.date >= today && s.date <= lastDay).length
+  }, 0)
   const products = new Map()
   for (const sale of sales) {
     const product = products.get(sale.itemId) || { id: sale.itemId, name: sale.name, units: 0, revenue: 0 }
@@ -16,7 +26,9 @@ export function tourAnalytics(data, tourId) {
     products.set(sale.itemId, product)
   }
   return {
-    stops, positions, confirmed, approved,
+    stops, positions, confirmed, approved, totalWorkers, upcomingShifts,
+    pendingApplications: applications.filter(a => a.status === 'Applied').length,
+    shiftWindow: {start:today,end:lastDay},
     vacancies: Math.max(0, positions - confirmed - approved),
     fillRate: positions ? Math.round(confirmed / positions * 100) : null,
     tasksDone: tasks.filter(t => t.done).length, taskCount: tasks.length,

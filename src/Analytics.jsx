@@ -5,9 +5,16 @@ export default function Analytics({ data, tourId }) {
   const metrics = tourAnalytics(data, tourId)
   return <>
     <div className="analytics-intro"><p>Selected tour · All saved records · Updates as your team works</p><span className="badge">Local workspace data</span></div>
+    <div className="stats analytics-key-metrics">
+      <Metric label="Total Tour Stops" value={metrics.stops.length} note="Scheduled stops on this tour" />
+      <Metric label="Total Workers" value={metrics.totalWorkers} note="Unique employees with confirmed assignments" />
+      <Metric label="Staffing Completion" value={metrics.fillRate === null ? '—' : `${metrics.fillRate}%`} note={`${metrics.confirmed} confirmed / ${metrics.positions} positions`} />
+      <Metric label="Open Positions" value={metrics.vacancies} note={`${metrics.approved} approved, awaiting confirmation`} />
+      <Metric label="Upcoming Shifts" value={metrics.upcomingShifts} note="Confirmed worker shifts · today + next 6 days" />
+      <Metric label="Pending Applications" value={metrics.pendingApplications} note="Applications awaiting manager approval" />
+    </div>
+    <p className="muted">Upcoming shifts: {metrics.shiftWindow.start} through {metrics.shiftWindow.end} (America/Chicago). Each confirmed worker at each stop counts as one shift. Approved positions are reserved until the worker confirms.</p>
     <div className="stats">
-      <Metric label="Confirmed staffing" value={metrics.fillRate === null ? '—' : `${metrics.fillRate}%`} note={`${metrics.confirmed} confirmed / ${metrics.positions} positions`} />
-      <Metric label="Open positions" value={metrics.vacancies} note={`${metrics.approved} approved, awaiting confirmation`} />
       <Metric label="Recorded merch sales" value={money(metrics.revenue)} note={`${metrics.units} units sold · USD`} />
       <Metric label="Tasks complete" value={metrics.taskCount ? `${Math.round(metrics.tasksDone / metrics.taskCount * 100)}%` : '—'} note={`${metrics.tasksDone} of ${metrics.taskCount} tasks completed`} />
     </div>

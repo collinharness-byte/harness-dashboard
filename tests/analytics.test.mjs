@@ -14,3 +14,13 @@ test('empty tours show no-data percentages without NaN or invented sales',()=>{
  const m=tourAnalytics(data,'empty')
  assert.equal(m.fillRate,null);assert.equal(m.revenue,0);assert.equal(m.taskCount,0);assert.deepEqual(m.products,[])
 })
+test('worker counts deduplicate people; upcoming confirmed shifts use Chicago dates and seven calendar days',()=>{
+ const fixture={...data,stops:[{id:'s',tourId:'t',date:'2026-10-31'},{id:'end',tourId:'t',date:'2026-11-06'},{id:'outside',tourId:'t',date:'2026-11-07'},{id:'past',tourId:'t',date:'2026-10-30'}],applications:[{jobId:'j',email:'CASEY@example.com',status:'Confirmed'},{jobId:'wide',email:'casey@example.com',status:'Confirmed'},{jobId:'wide',email:'other@example.com',status:'Confirmed'},{jobId:'j',email:'pending@example.com',status:'Applied'},{jobId:'j',email:'approved@example.com',status:'Approved'}]}
+ // UTC November 1 is still October 31 in Chicago, spanning the DST transition.
+ const m=tourAnalytics(fixture,'t',new Date('2026-11-01T01:00:00Z'))
+ assert.equal(m.totalWorkers,2)
+ assert.equal(m.pendingApplications,1)
+ assert.deepEqual(m.shiftWindow,{start:'2026-10-31',end:'2026-11-06'})
+ assert.equal(m.upcomingShifts,5) // one local shift plus two touring workers at two stops
+ assert.equal(tourAnalytics(fixture,'empty').upcomingShifts,0)
+})
