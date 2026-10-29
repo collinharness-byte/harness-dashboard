@@ -7,7 +7,7 @@ npm ci
 npm run dev
 ```
 
-Open the address printed by Vite. The Manager / Worker selector lets you try both sides of the same sample workspace.
+Open the address printed by Vite. The login page offers separate manager and employee signup paths. Create local demo accounts with unique demo passwords. Accounts and data exist only in the current browser; there is no shared backend.
 
 ## Included
 
@@ -23,24 +23,27 @@ Open the address printed by Vite. The Manager / Worker selector lets you try bot
 
 ## Try the staffing workflow
 
-1. Switch to Worker and edit the profile, including email, qualifications, and availability.
-2. Apply for a role. Use the same email as the worker profile.
-3. Switch to Manager, open Jobs & staffing, and approve the application.
-4. Switch to Worker and confirm the assignment.
-5. For the sample volunteer shift, include “Guest services” in qualifications. A manager must preapprove the profile before the worker can reserve that shift. Editing a profile clears preapproval.
+1. Sign up as an employee, open Employment profile, and save qualifications, employment history, location, preferred roles, and availability.
+2. Browse Find jobs and apply for a position. All posted tours are searchable.
+3. Log out through the upper-right profile menu, then sign up as a manager in the same browser.
+4. Open Jobs & staffing and approve the employee application. Employee profiles can also be preapproved for open shifts.
+5. Log out, log in as the employee, open Applications, and confirm the assignment.
+6. Open My schedule to see the role, shift times, venue address, contacts, loading / parking notes, and show-day schedule. Tour-wide assignments show every stop.
+
+Local demo accounts store salted PBKDF2 password hashes, not plain passwords. This does not provide server-side authentication or protect local data from browser access. A session lasts in the current tab until logout. Account email is fixed for now so applications remain associated with the same employee.
 
 ## Validation
 
 ```sh
 npm run build
 npm run lint
-node --test --test-isolation=none --test-reporter=spec tests/staffing.test.mjs
+node --test --test-isolation=none --test-reporter=spec tests/auth.test.mjs tests/staffing.test.mjs
 ```
 
-Three tests cover approval / confirmation transitions, capacity reservation, preapproval, qualification matching, and duplicate reservations. Browser validation also exercised application → approval → confirmation, open-shift reservation, persistence after reload, and mobile overflow.
+Four tests cover local account validation and approval / confirmation transitions, capacity reservation, preapproval, qualification matching, and duplicate reservations. Browser validation also exercised application → approval → confirmation, open-shift reservation, persistence after reload, and mobile overflow.
 
 ## Prototype boundaries
 
-This is a local demonstration, not a production staffing platform. The role selector and access labels do not enforce security. Data is held in one browser, is editable through browser tools, and is not synchronized across users or devices. Use fictional information during evaluation.
+This is a local demonstration, not a production staffing platform. Local login and access labels do not enforce server-side security. Managers share the sample tour workspace. Data is held in one browser, is editable through browser tools, and is not synchronized across users or devices. Use fictional information during evaluation.
 
-Next production work: user authentication, server-side permissions, shared database with transactional staffing capacity, structured qualification and availability checks, worker identity, file storage, notifications, and deployment. Availability is currently a free-text statement; open shifts match qualification phrases rather than verified certifications. Documents are references / notes, not uploaded files. Crew directory is shared across the local workspace rather than assigned per tour. VIP guests and sponsors are currently stop notes rather than individual records.
+Next production work: user authentication, server-side permissions, shared database with transactional staffing capacity, structured qualification and availability checks, verified worker identity, password recovery, file storage, notifications, and deployment. Availability is currently a free-text statement; open shifts match qualification phrases rather than verified certifications. Documents are references / notes, not uploaded files. Crew directory is shared across the local workspace rather than assigned per tour. VIP guests and sponsors are currently stop notes rather than individual records.
