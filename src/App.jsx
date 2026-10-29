@@ -1,407 +1,64 @@
-import { useMemo, useState } from "react";
-
-export default function App() {
-  const [weeklyIncome, setWeeklyIncome] = useState(211);
-  const [portfolioValue, setPortfolioValue] = useState(52000);
-  const [weeklyInvestment, setWeeklyInvestment] = useState(500);
-  const [youtubeShorts, setYoutubeShorts] = useState(0);
-  const [substackPosts, setSubstackPosts] = useState(0);
-  const [workouts, setWorkouts] = useState(0);
-  const [jogs, setJogs] = useState(0);
-
-  const today = "Sunday, May 3, 2026";
-  const weeklyGoal = 1000;
-
-  const incomeProgress = Math.min((weeklyIncome / weeklyGoal) * 100, 100);
-
-  const estimatedWeeks = useMemo(() => {
-    const gap = weeklyGoal - weeklyIncome;
-    if (gap <= 0) return 0;
-
-    const estimatedWeeklyIncomeAdded = weeklyInvestment * 0.012;
-    if (estimatedWeeklyIncomeAdded <= 0) return "—";
-
-    return Math.ceil(gap / estimatedWeeklyIncomeAdded);
-  }, [weeklyIncome, weeklyInvestment]);
-
-  return (
-    <div style={styles.page}>
-      <div style={styles.container}>
-        <p style={styles.badge}>Personal Operating System</p>
-
-        <h1 style={styles.title}>Harness Dashboard</h1>
-
-        <p style={styles.date}>{today}</p>
-
-        <p style={styles.subtitle}>
-          Track your money, content, health, and momentum in one place.
-        </p>
-
-        <div style={styles.grid4}>
-          <MetricCard
-            label="Weekly Income"
-            value={`$${weeklyIncome}`}
-            note={`${incomeProgress.toFixed(1)}% to goal`}
-          />
-          <MetricCard
-            label="Portfolio Value"
-            value={`$${portfolioValue.toLocaleString()}`}
-            note="Current base"
-          />
-          <MetricCard
-            label="Weekly Investment"
-            value={`$${weeklyInvestment}`}
-            note="Capital added"
-          />
-          <MetricCard
-            label="Est. Weeks to Goal"
-            value={estimatedWeeks}
-            note="Rough estimate"
-          />
-        </div>
-
-        <section style={styles.section}>
-          <h2>Income Goal</h2>
-
-          <div style={styles.progressOuter}>
-            <div
-              style={{
-                ...styles.progressInner,
-                width: `${incomeProgress}%`,
-              }}
-            />
-          </div>
-
-          <p style={styles.note}>
-            ${weeklyIncome} / ${weeklyGoal} per week
-          </p>
-
-          <div style={styles.inputs}>
-            <Input
-              label="Weekly Income"
-              value={weeklyIncome}
-              setValue={setWeeklyIncome}
-            />
-            <Input
-              label="Portfolio Value"
-              value={portfolioValue}
-              setValue={setPortfolioValue}
-            />
-            <Input
-              label="Weekly Investment"
-              value={weeklyInvestment}
-              setValue={setWeeklyInvestment}
-            />
-          </div>
-        </section>
-
-        <div style={styles.grid2}>
-          <section style={styles.section}>
-            <h2>Content System</h2>
-
-            <Tracker
-              label="YouTube Shorts This Week"
-              value={youtubeShorts}
-              setValue={setYoutubeShorts}
-              goal={7}
-            />
-
-            <Tracker
-              label="Substack Posts This Week"
-              value={substackPosts}
-              setValue={setSubstackPosts}
-              goal={3}
-            />
-
-            <ul>
-              <li>Monday: Income Report</li>
-              <li>Wednesday: Stock Deep Dive</li>
-              <li>Friday: System Post</li>
-              <li>Daily: YouTube Shorts</li>
-            </ul>
-          </section>
-
-          <section style={styles.section}>
-            <h2>Health System</h2>
-
-            <Tracker
-              label="Workouts This Week"
-              value={workouts}
-              setValue={setWorkouts}
-              goal={3}
-            />
-
-            <Tracker
-              label="Jogs This Week"
-              value={jogs}
-              setValue={setJogs}
-              goal={3}
-            />
-
-            <ul>
-              <li>Improve energy</li>
-              <li>Lose 10 lbs</li>
-              <li>Build muscle</li>
-            </ul>
-          </section>
-        </div>
-
-        <div style={styles.grid2}>
-          <section style={styles.section}>
-            <h2>Portfolio Focus</h2>
-            <ul>
-              <li>Keep building weekly income</li>
-              <li>Track MSTY income contribution</li>
-              <li>Reinvest dividends when possible</li>
-              <li>Avoid emotional selling</li>
-            </ul>
-          </section>
-
-          <section style={styles.section}>
-            <h2>Life Audit Focus</h2>
-
-            <div style={styles.lifeGrid}>
-              <Score area="Health" score={5} />
-              <Score area="Mind" score={4} />
-              <Score area="Marriage" score={7} />
-              <Score area="Friends" score={3} />
-              <Score area="Career" score={2} />
-              <Score area="Finances" score={6} />
-              <Score area="Fun" score={4} />
-            </div>
-          </section>
-        </div>
-
-        <section style={styles.section}>
-          <h2>Today’s Focus</h2>
-
-          <div style={styles.focusGrid}>
-            <Focus item="Buy or research income-producing shares" />
-            <Focus item="Post one short-form video" />
-            <Focus item="Move your body for 30 minutes" />
-            <Focus item="Do one thing that improves the house" />
-          </div>
-        </section>
-      </div>
-    </div>
-  );
+import { useState } from 'react'
+import { initialData, transitionApplication, reserveShift } from './data'
+import './App.css'
+const nav=['Overview','Tour stops','Calendar','Crew directory','Jobs & staffing','Announcements','Documents']
+const uid=()=>crypto.randomUUID()
+function Field({label,name,defaultValue='',type='text',required=false}) {return <label>{label}<input name={name} type={type} defaultValue={defaultValue} required={required}/></label>}
+function Badge({children}) {return <span className="badge">{children}</span>}
+export default function App(){
+ const [data,setData]=useState(()=>{try{const saved=JSON.parse(localStorage.getItem('tourline-v1'));return saved?.tours?.length?saved:initialData}catch{return initialData}})
+ const [storageError,setStorageError]=useState(false)
+ const [page,setPage]=useState('Overview'),[role,setRole]=useState('Manager'),[tourId,setTourId]=useState(data.tours[0].id),[stopId,setStopId]=useState(data.stops[0]?.id),[modal,setModal]=useState(null),[query,setQuery]=useState(''),[notice,setNotice]=useState('')
+ const tour=data.tours.find(t=>t.id===tourId)||data.tours[0], stops=data.stops.filter(s=>s.tourId===tour.id),stop=stops.find(s=>s.id===stopId)||stops[0],jobs=data.jobs.filter(j=>j.tourId===tour.id)
+ const update=(key,value)=>{const next={...data,[key]:typeof value==='function'?value(data[key]):value};setData(next);try{localStorage.setItem('tourline-v1',JSON.stringify(next));setStorageError(false)}catch{setStorageError(true)}}
+ const add=(key,value)=>update(key,items=>[...items,{id:uid(),...value}])
+ const run=fn=>{try{fn();setNotice('Saved successfully')}catch(e){setNotice(e.message)}}
+ const onSubmit=e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.currentTarget));run(()=>{
+ if(modal==='tour'){if(f.end<f.start)throw new Error('End date must be on or after start date');const id=uid();update('tours',v=>[...v,{id,...f}]);setTourId(id)}
+ if(modal==='stop')add('stops',{...f,tourId:tour.id})
+ if(modal==='editStop')update('stops',v=>v.map(s=>s.id===stop.id?{...s,...f}:s))
+ if(modal==='crew')add('crew',f)
+ if(modal==='job')add('jobs',{...f,tourId:tour.id,capacity:Number(f.capacity)})
+ if(modal==='event')add('schedule',{...f,stopId:stop.id})
+ if(modal==='task')add('tasks',{...f,stopId:stop.id,done:false})
+ if(modal==='announcement')add('announcements',{...f,tourId:tour.id})
+ if(modal==='document')add('documents',{...f,tourId:tour.id})
+ if(modal==='profile')update('profile',{...data.profile,...f,approved:false})
+ if(modal?.job){const job=modal.job;if(data.applications.some(a=>a.jobId===job.id&&a.email===f.email&&a.status!=='Declined'))throw new Error('You have already applied for this job');add('applications',{...f,jobId:job.id,status:'Applied'})}
+ setModal(null)
+ })}
+ const assigned=data.applications.filter(a=>jobs.some(j=>j.id===a.jobId)&&a.status==='Confirmed')
+ const openJobs=jobs.filter(j=>data.applications.filter(a=>a.jobId===j.id&&['Approved','Confirmed'].includes(a.status)).length<j.capacity)
+ const title=role==='Worker'?'Find your next show':page==='Overview'?'Every detail. One great tour.':page
+ const venueName=id=>data.stops.find(s=>s.id===id)?.city||id
+ return <div className="app"><aside><a className="brand" href="#" onClick={e=>{e.preventDefault();setPage('Overview')}}><span className="brand-mark">≋</span> tourline<span className="brand-dot">.</span></a><p className="nav-label">YOUR WORKSPACE</p><nav>{nav.map((n,i)=><button className={page===n?'active':''} key={n} onClick={()=>{setPage(n);setQuery('')}}><span>{['◫','◎','▦','♙','▤','◷','▧'][i]}</span>{n}{n==='Jobs & staffing'&&<small>{openJobs.length}</small>}</button>)}</nav><div className="sidebar-bottom"><div className="help-card"><span>Made for the road.</span><p>Less coordination.<br/>More unforgettable shows.</p></div><div className="user"><span className="avatar">JE</span><div><b>{role==='Manager'?'Jordan Ellis':data.profile.name||'Worker workspace'}</b><small>{role==='Manager'?'Tour manager':'Worker'}</small></div></div></div></aside>
+ <main><header><div className="breadcrumb">Workspace <span>/</span> {role==='Manager'?page:'Worker portal'}</div><div className="header-actions"><span className="demo">LOCAL PROTOTYPE</span><select aria-label="Switch workspace role" value={role} onChange={e=>{setRole(e.target.value);setNotice('')}}><option>Manager</option><option>Worker</option></select></div></header>
+ <div className="content">{storageError&&<div className="alert">Browser storage is unavailable. Changes will only last for this session.</div>}{notice&&<div role="status" className="notice">{notice}<button onClick={()=>setNotice('')} aria-label="Dismiss notification">×</button></div>}
+ <div className="heading"><div><div className="eyebrow">THE SHOW STARTS HERE</div><h1>{title}</h1><p>{role==='Manager'?'Your people, places, and plans. Perfectly in sync.':'Discover opportunities, confirm your shifts, and get on the road.'}</p></div>{role==='Manager'?<button className="primary" onClick={()=>setModal('tour')}>＋ Create tour</button>:<button className="primary" onClick={()=>setModal('profile')}>Edit worker profile</button>}</div>
+ <div className="tour-bar"><div><span className="tour-icon">♫</span><select aria-label="Selected tour" value={tour.id} onChange={e=>setTourId(e.target.value)}>{data.tours.map(t=><option value={t.id} key={t.id}>{t.name}</option>)}</select><span className="muted">{tour.artist}</span></div><Badge>{tour.start} → {tour.end}</Badge></div>
+ {role==='Worker'?<><div className="stats"><Stat label="Available opportunities" value={openJobs.length} note="Across the selected tour"/><Stat label="My applications" value={data.applications.filter(a=>a.email===data.profile.email).length} note="Track your next opportunity"/><Stat label="Confirmed shifts" value={assigned.filter(a=>a.email===data.profile.email).length} note="Ready for show day"/></div><section className="panel"><div className="panel-title"><h2>Opportunities on the road</h2><input aria-label="Filter jobs by title or location" placeholder="Search jobs or cities…" value={query} onChange={e=>setQuery(e.target.value)}/></div><p className="muted">Open shifts require manager preapproval and matching qualifications. Profile changes require renewed approval.</p><div className="job-grid">{jobs.filter(j=>(j.title+' '+venueName(j.scope)).toLowerCase().includes(query.toLowerCase())).map(j=><Job key={j.id} job={j} location={venueName(j.scope)} applications={data.applications} action={<button className="primary" onClick={()=>j.mode==='Open shift'?run(()=>{if(!data.profile.name||!data.profile.email||!data.profile.availability)throw new Error('Complete your worker profile and availability first');update('applications',reserveShift(data.applications,j,data.profile))}):setModal({job:j})}>{j.mode==='Open shift'?'Reserve shift':'Apply for role'} →</button>}/>)}</div></section><section className="panel"><h2>My applications & schedule</h2>{data.applications.filter(a=>a.email===data.profile.email).map(a=><div className="list-row" key={a.id}><div><b>{data.jobs.find(j=>j.id===a.jobId)?.title}</b><p>{a.availability}</p></div><Badge>{a.status}</Badge>{a.status==='Approved'&&<button className="primary" onClick={()=>run(()=>update('applications',transitionApplication(data.applications,a.id,'confirm',data.jobs)))}>Confirm assignment</button>}</div>)}{!data.applications.some(a=>a.email===data.profile.email)&&<Empty text="Apply for a role to start building your tour schedule."/>}</section><section className="panel"><h2>Crew updates</h2><p className="muted">Tour announcements and documents become available after you confirm an assignment.</p>{assigned.some(a=>a.email===data.profile.email)&&[...data.announcements,...data.documents].filter(n=>n.tourId===tour.id&&n.audience==='All crew').map(n=><article className="list-row" key={n.id}><div><b>{n.title}</b><p>{n.body||n.detail}</p></div></article>)}</section></>:
+ <>
+ {page==='Overview'&&<><div className="stats"><Stat label="Tour stops" value={stops.length.toString().padStart(2,'0')} note="Cities. Stages. New memories."/><Stat label="People on the road" value={data.crew.length.toString().padStart(2,'0')} note="One team behind every show"/><Stat label="Open positions" value={openJobs.length.toString().padStart(2,'0')} note="Find your next great crew member"/><Stat label="Confirmed assignments" value={assigned.length.toString().padStart(2,'0')} note="Ready to make it happen"/></div><div className="overview-grid"><section className="panel stops-panel"><div className="panel-title"><div><h2>The road ahead</h2><p>Your next stops, at a glance.</p></div><button className="text-button" onClick={()=>setPage('Tour stops')}>View all stops ↗</button></div>{stops.map((s,i)=><button key={s.id} className="stop-row" onClick={()=>{setStopId(s.id);setPage('Tour stops')}}><div className="date-box"><small>{new Date(s.date+'T12:00:00').toLocaleString('en-US',{month:'short'}).toUpperCase()}</small><b>{s.date.slice(-2)}</b></div><div className="stop-info"><b>{s.city}</b><span>{s.venue}</span></div><Badge>{i===0?'Next stop':'Scheduled'}</Badge><span className="row-arrow">↗</span></button>)}{!stops.length&&<Empty text="Add your first tour stop to start planning."/>}<button className="add-row" onClick={()=>setModal('stop')}>＋ Add a tour stop</button></section><section className="blue-panel"><div className="eyebrow">GREAT SHOWS START WITH GREAT PEOPLE</div><div className="orbit-art"><span>✦</span><i>♫</i><b>↗</b></div><h2>Build your<br/>backstage team.</h2><p>From the first load-in to the last encore. Find the right people for every stop.</p><button onClick={()=>{setPage('Jobs & staffing');setModal('job')}}>Post an opportunity ↗</button></section></div><section className="panel"><div className="panel-title"><h2>On the radar</h2><button className="text-button" onClick={()=>setPage('Announcements')}>All updates ↗</button></div>{data.announcements.filter(n=>n.tourId===tour.id).map(n=><article key={n.id} className="list-row"><span className="update-icon">◷</span><div><b>{n.title}</b><p>{n.body}</p></div><Badge>{n.audience}</Badge></article>)}</section></>}
+ {page==='Tour stops'&&<><div className="section-toolbar"><select aria-label="Select tour stop" value={stop?.id||''} onChange={e=>setStopId(e.target.value)}>{stops.map(s=><option value={s.id} key={s.id}>{s.date} · {s.city}</option>)}</select><button className="primary" onClick={()=>setModal('stop')}>＋ Add stop</button></div>{stop?<><section className="panel"><div className="panel-title"><div><div className="eyebrow">{stop.date} · {stop.city}</div><h2>{stop.venue}</h2><p>{stop.address||'Address not added'} · Capacity {stop.capacity||'not added'}</p></div><button onClick={()=>setModal('editStop')}>Edit stop details</button></div><div className="detail-grid">{[['Loading','loading'],['Parking','parking'],['Technical requirements','technical'],['Venue contact','contact'],['Contact phone','phone'],['Hotel','hotel'],['Food & catering','food'],['Ground transport','cars'],['Equipment','equipment'],['VIP & meet and greet','vip'],['Sponsors','sponsors'],['Contract status','contract']].map(([label,key])=><div key={key}><small>{label}</small><p>{stop[key]||'Not added yet'}</p></div>)}</div></section><div className="two-col"><section className="panel"><div className="panel-title"><h2>Show day schedule</h2><button onClick={()=>setModal('event')}>＋ Add time</button></div>{data.schedule.filter(e=>e.stopId===stop.id).sort((a,b)=>a.time.localeCompare(b.time)).map(e=><div className="schedule-row" key={e.id}><time>{e.time}</time><div><b>{e.title}</b><p>{e.owner}</p></div></div>)}</section><section className="panel"><div className="panel-title"><h2>Before the doors open</h2><button onClick={()=>setModal('task')}>＋ Add task</button></div>{data.tasks.filter(t=>t.stopId===stop.id).map(t=><label className="task" key={t.id}><input type="checkbox" checked={t.done} onChange={()=>update('tasks',v=>v.map(x=>x.id===t.id?{...x,done:!x.done}:x))}/><span className={t.done?'done':''}>{t.title}</span></label>)}</section></div></>:<Empty text="Add a stop to plan venue logistics and daily operations."/>}</>}
+ {page==='Calendar'&&<section className="panel"><div className="panel-title"><h2>Tour calendar</h2><Badge>{stops.length} scheduled shows</Badge></div><div className="calendar-grid">{stops.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(s=><button key={s.id} className="calendar-card" onClick={()=>{setStopId(s.id);setPage('Tour stops')}}><span>{s.date}</span><h2>{s.city}</h2><p>{s.venue}</p>{data.schedule.filter(e=>e.stopId===s.id).sort((a,b)=>a.time.localeCompare(b.time)).map(e=><small key={e.id}>{e.time} · {e.title}</small>)}</button>)}</div>{!stops.length&&<Empty text="Your tour dates will appear here after you add stops."/>}</section>}
+ {page==='Crew directory'&&<section className="panel"><div className="panel-title"><h2>The people behind the show</h2><button className="primary" onClick={()=>setModal('crew')}>＋ Add crew member</button></div><input aria-label="Search crew" placeholder="Search people or roles…" value={query} onChange={e=>setQuery(e.target.value)}/><div className="crew-grid">{data.crew.filter(c=>(c.name+' '+c.role).toLowerCase().includes(query.toLowerCase())).map(c=><article className="crew-card" key={c.id}><span className="avatar">{c.name.split(' ').map(n=>n[0]).slice(0,2).join('')}</span><h3>{c.name}</h3><Badge>{c.role}</Badge><p>{c.location}</p><p>{c.responsibility}</p><a href={'mailto:'+c.email}>{c.email}</a><small>Intended access: {c.permission}</small></article>)}</div><p className="muted">Access labels are planning information in this prototype. Secure permissions require user accounts.</p></section>}
+ {page==='Jobs & staffing'&&<><section className="panel"><div className="panel-title"><div><h2>Find your people</h2><p>Tour-wide roles and local opportunities.</p></div><button className="primary" onClick={()=>setModal('job')}>＋ Post a job</button></div><div className="job-grid">{jobs.map(j=><Job key={j.id} job={j} applications={data.applications} location={venueName(j.scope)}/>)}</div></section><section className="panel"><h2>Worker preapproval</h2>{data.profile.name?<div className="list-row"><div><b>{data.profile.name}</b><p>{data.profile.qualifications} · {data.profile.availability}</p><small>{data.profile.email}</small></div><button disabled={data.profile.approved} onClick={()=>update('profile',{...data.profile,approved:true})}>{data.profile.approved?'Preapproved':'Preapprove worker'}</button></div>:<Empty text="Switch to Worker and complete a profile to try preapproved open shifts."/>}</section><section className="panel"><h2>Applications & assignments</h2>{data.applications.filter(a=>jobs.some(j=>j.id===a.jobId)).map(a=><div className="list-row application" key={a.id}><div><b>{a.name} · {jobs.find(j=>j.id===a.jobId)?.title}</b><p>{a.qualifications}</p><small>{a.email} · {a.availability}</small></div><Badge>{a.status}</Badge>{a.status==='Applied'&&<><button className="primary" onClick={()=>run(()=>update('applications',transitionApplication(data.applications,a.id,'approve',data.jobs)))}>Approve</button><button onClick={()=>run(()=>update('applications',transitionApplication(data.applications,a.id,'decline',data.jobs)))}>Decline</button></>}</div>)}{!data.applications.some(a=>jobs.some(j=>j.id===a.jobId))&&<Empty text="Applications will appear here. Switch to Worker to try applying."/>}</section></>}
+ {['Announcements','Documents'].includes(page)&&<section className="panel"><div className="panel-title"><div><h2>{page==='Documents'?'Everything the crew needs':'Keep everyone in the loop'}</h2><p>Shared with the selected tour.</p></div><button className="primary" onClick={()=>setModal(page==='Documents'?'document':'announcement')}>＋ {page==='Documents'?'Add reference':'New announcement'}</button></div>{data[page==='Documents'?'documents':'announcements'].filter(n=>n.tourId===tour.id).map(n=><article className="document-card" key={n.id}><Badge>{n.audience}</Badge><h3>{n.title}</h3><p>{n.body||n.detail}</p></article>)}{page==='Documents'&&<p className="muted">Store document references and contact notes here. File uploads and secure document sharing will be added with the backend.</p>}</section>}
+ </>}
+ <footer><span>tourline. <span className="muted">A little less chaos. A lot more show.</span></span><span>Sample workspace · Saved in this browser</span></footer>
+ </div></main>
+ {modal&&<div className="modal-backdrop" onClick={e=>{if(e.target===e.currentTarget)setModal(null)}}><section className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title"><div className="panel-title"><h2 id="modal-title">{modal?.job?'Apply · '+modal.job.title:({tour:'Create a tour',stop:'Add a tour stop',editStop:'Edit stop details',crew:'Add crew member',job:'Post an opportunity',event:'Add schedule time',task:'Add task',announcement:'New announcement',document:'Add a document reference',profile:'Worker profile'})[modal]}</h2><button aria-label="Close dialog" onClick={()=>setModal(null)}>×</button></div><form onSubmit={onSubmit}>{notice&&<p role="status" className="notice">{notice}</p>}
+ {modal==='tour'&&<><Field label="Tour name" name="name" required/><Field label="Artist" name="artist" required/><Field label="Start date" name="start" type="date" required/><Field label="End date" name="end" type="date" required/></>}
+ {['stop','editStop'].includes(modal)&&<>{[['City','city'],['Venue','venue'],['Date','date'],['Address','address'],['Capacity','capacity'],...(modal==='editStop'?[['Loading','loading'],['Parking','parking'],['Technical requirements','technical'],['Contact','contact'],['Phone','phone'],['Hotel','hotel'],['Food','food'],['Cars','cars'],['Equipment','equipment'],['VIP / guest list','vip'],['Sponsors','sponsors'],['Contract status','contract']]:[])].map(([label,name])=><Field key={name} label={label} name={name} type={name==='date'?'date':'text'} required={['city','venue','date'].includes(name)} defaultValue={modal==='editStop'?stop[name]:''}/>)}</>}
+ {modal==='crew'&&<><Field label="Full name" name="name" required/><Field label="Role" name="role" required/><Field label="Location or tour-wide" name="location" required/><Field label="Email" name="email" type="email" required/><Field label="Responsibilities" name="responsibility"/><label>Intended access<select name="permission"><option>Crew</option><option>Manager</option></select></label></>}
+ {modal==='job'&&<><Field label="Job title" name="title" required/><label>Location / scope<select name="scope"><option>Tour-wide</option>{stops.map(s=><option value={s.id} key={s.id}>{s.city}</option>)}</select></label><label>Staffing process<select name="mode"><option>Application</option><option>Open shift</option></select></label><Field label="Pay (or Volunteer)" name="pay" required/><label>Positions<input name="capacity" type="number" min="1" max="100" defaultValue="1" required/></label><Field label="Required qualification (open shifts use a matching phrase)" name="qualification" required/><Field label="Call time" name="start" type="time" required/><Field label="End time" name="end" type="time" required/></>}
+ {modal==='event'&&<><Field label="Time" name="time" type="time" required/><Field label="Schedule item" name="title" required/><Field label="Responsible crew" name="owner" required/></>}
+ {modal==='task'&&<Field label="Task" name="title" required/>}
+ {['announcement','document'].includes(modal)&&<><Field label="Title" name="title" required/><label>{modal==='document'?'Reference / contact information':'Message'}<textarea name={modal==='document'?'detail':'body'} required rows="4"/></label><label>Audience<select name="audience"><option>All crew</option><option>Managers only</option></select></label></>}
+ {(modal==='profile'||modal?.job)&&<><Field label="Full name" name="name" defaultValue={data.profile.name} required/><Field label="Email (used to match your applications)" name="email" type="email" defaultValue={data.profile.email} required/>{modal==='profile'&&<Field label="Home location" name="location" defaultValue={data.profile.location} required/>}<Field label="Qualifications / experience" name="qualifications" defaultValue={data.profile.qualifications} required/><Field label="Availability (dates and times)" name="availability" defaultValue={data.profile.availability} required/>{modal?.job&&<p className="muted">Requirements: {modal.job.qualification}. Save a worker profile with the same email to track your application.</p>}</>}
+ <div className="form-actions"><button type="button" onClick={()=>setModal(null)}>Cancel</button><button className="primary" type="submit">{modal?.job?'Submit application':'Save'}</button></div></form></section></div>}
+ </div>
 }
-
-function MetricCard({ label, value, note }) {
-  return (
-    <div style={styles.card}>
-      <p style={styles.cardLabel}>{label}</p>
-      <h2 style={styles.cardValue}>{value}</h2>
-      <p style={styles.note}>{note}</p>
-    </div>
-  );
-}
-
-function Input({ label, value, setValue }) {
-  return (
-    <label style={styles.inputGroup}>
-      <span>{label}</span>
-      <input
-        type="number"
-        value={value}
-        onChange={(e) => setValue(Number(e.target.value))}
-        style={styles.input}
-      />
-    </label>
-  );
-}
-
-function Tracker({ label, value, setValue, goal }) {
-  const progress = Math.min((value / goal) * 100, 100);
-
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={styles.trackerTop}>
-        <strong>{label}</strong>
-        <span>
-          {value}/{goal}
-        </span>
-      </div>
-
-      <div style={styles.progressOuterSmall}>
-        <div
-          style={{
-            ...styles.progressInner,
-            width: `${progress}%`,
-          }}
-        />
-      </div>
-
-      <div style={{ marginTop: 8 }}>
-        <button
-          style={styles.smallButton}
-          onClick={() => setValue(Math.max(0, value - 1))}
-        >
-          -
-        </button>
-
-        <button style={styles.smallButton} onClick={() => setValue(value + 1)}>
-          +
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Score({ area, score }) {
-  return (
-    <div style={styles.scoreBox}>
-      <span>{area}</span>
-      <strong>{score}/10</strong>
-    </div>
-  );
-}
-
-function Focus({ item }) {
-  return <div style={styles.focusItem}>✓ {item}</div>;
-}
-
-const styles = {
-  page: {
-    minHeight: "100vh",
-    background: "#020617",
-    color: "white",
-    fontFamily: "Arial, sans-serif",
-    padding: 24,
-  },
-  container: {
-    maxWidth: 1150,
-    margin: "0 auto",
-  },
-  badge: {
-    display: "inline-block",
-    background: "#064e3b",
-    color: "#a7f3d0",
-    padding: "8px 12px",
-    borderRadius: 999,
-    fontSize: 13,
-  },
-  title: {
-    fontSize: 48,
-    margin: "16px 0 8px",
-  },
-  date: {
-    color: "#94a3b8",
-    fontSize: 16,
-    marginBottom: 12,
-  },
-  subtitle: {
-    color: "#cbd5e1",
-    fontSize: 18,
-    marginBottom: 24,
-  },
-  grid4: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-    gap: 16,
-    marginBottom: 18,
-  },
-  grid2: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-    gap: 16,
-    marginBottom: 18,
-  },
-  card: {
-    background: "#0f172a",
-    border: "1px solid #1e293b",
-    borderRadius: 18,
-    padding: 20,
-  },
-  cardLabel: {
-    color: "#94a3b8",
-    margin: 0,
-  },
-  cardValue: {
-    fontSize: 32,
-    margin: "8px 0",
-  },
-  note: {
-    color: "#94a3b8",
-  },
-  section: {
-    background: "#0f172a",
-    border: "1px solid #1e293b",
-    borderRadius: 18,
-    padding: 22,
-    marginBottom: 18,
-  },
-  progressOuter: {
-    background: "#1e293b",
-    height: 24,
-    borderRadius: 999,
-    overflow: "hidden",
-  },
-  progressOuterSmall: {
-    background: "#1e293b",
-    height: 12,
-    borderRadius: 999,
-    overflow: "hidden",
-  },
-  progressInner: {
-    background: "#22c55e",
-    height: "100%",
-    borderRadius: 999,
-  },
-  inputs: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: 12,
-    marginTop: 18,
-  },
-  inputGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: 6,
-    color: "#cbd5e1",
-  },
-  input: {
-    padding: 12,
-    borderRadius: 10,
-    border: "1px solid #334155",
-    background: "#020617",
-    color: "white",
-    fontSize: 16,
-  },
-  trackerTop: {
-    display: "flex",
-    justifyContent: "space-between",
-    marginBottom: 8,
-  },
-  smallButton: {
-    marginRight: 8,
-    padding: "6px 12px",
-    borderRadius: 8,
-    border: "none",
-    cursor: "pointer",
-  },
-  lifeGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-    gap: 10,
-  },
-  scoreBox: {
-    background: "#020617",
-    border: "1px solid #1e293b",
-    borderRadius: 12,
-    padding: 12,
-    display: "flex",
-    justifyContent: "space-between",
-  },
-  focusGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-    gap: 12,
-  },
-  focusItem: {
-    background: "#020617",
-    border: "1px solid #1e293b",
-    borderRadius: 12,
-    padding: 14,
-  },
-};
+function Stat({label,value,note}){return <section className="stat"><span>{label}<span className="stat-dot">↗</span></span><strong>{value}</strong><small>{note}</small></section>}
+function Empty({text}){return <p className="empty">{text}</p>}
+function Job({job,location,applications,action}){const filled=applications.filter(a=>a.jobId===job.id&&['Approved','Confirmed'].includes(a.status)).length;return <article className="job-card"><div className="panel-title"><span className="job-symbol">↗</span><Badge>{job.mode}</Badge></div><h3>{job.title}</h3><p>{location} · {job.start}–{job.end}</p><b>{job.pay}</b><p>{job.qualification}</p><small>{Math.max(0,job.capacity-filled)} of {job.capacity} positions open</small>{action}</article>}
