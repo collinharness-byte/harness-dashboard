@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { initialData, transitionApplication } from './data'
+import { transitionApplication } from './data'
 import './App.css'
 import AccountActions from './AccountActions'
 import AuthGate from './AuthGate'
@@ -7,13 +7,14 @@ import EmployeePortal from './EmployeePortal'
 const employeeLinks=['Find Work','Schedule','Account','Payments','Earnings','Refer A Friend','Help','Useful Information','Logout']
 import Merch from './Merch'
 import Analytics from './Analytics'
+import { loadWorkspace } from './workspaceStorage'
 const nav=['Overview','Tour stops','Calendar','Crew directory','Jobs & staffing','Merch','Analytics','Announcements','Documents']
 const uid=()=>crypto.randomUUID()
 function Field({label,name,defaultValue='',type='text',required=false}) {return <label>{label}<input name={name} type={type} defaultValue={defaultValue} required={required}/></label>}
 function Badge({children}) {return <span className="badge">{children}</span>}
 export default function App(){return <AuthGate>{(user,logout)=><Workspace key={user.id} user={user} logout={logout}/>}</AuthGate>}
 function Workspace({user,logout}){
- const [data,setData]=useState(()=>{try{const saved=JSON.parse(localStorage.getItem('tourline-v1'));return saved?.tours?.length?saved:initialData}catch{return initialData}})
+ const [data,setData]=useState(()=>loadWorkspace())
  const [storageError,setStorageError]=useState(false)
  const role=user.role
  const profile=(data.workers||[]).find(p=>p.userId===user.id)||{userId:user.id,name:user.name,email:user.email,qualifications:'',availability:'',approved:false}
